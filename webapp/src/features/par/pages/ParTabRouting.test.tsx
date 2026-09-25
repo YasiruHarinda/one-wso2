@@ -110,6 +110,11 @@ function hasNoActiveCycle() {
   openCycles.data = [];
 }
 
+function hasActiveCycle() {
+  openCycles.isSuccess = true;
+  openCycles.data = [{ parCycleId: 1 }];
+}
+
 function isIntern() {
   profile.data.employee.employmentType = "Internship";
 }
@@ -278,14 +283,17 @@ describe("an intern with nothing to show", () => {
   it("is redirected to /me when there's no active cycle and no history at all — real or legacy", async () => {
     hasNoHistoryAtAll();
     show();
-    expect(await screen.findByTestId("url")).toHaveTextContent("/me");
+    // Exact match, not a substring: "/me" is itself a prefix of
+    // "/me/performance", so a substring check here would also pass if the
+    // redirect never fired at all.
+    expect(await screen.findByTestId("url")).toHaveTextContent(/^\/me$/);
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
   });
 
   it("still reaches the group directly by URL — the redirect is not fooled by a deep link", async () => {
     hasNoHistoryAtAll();
     show("/me/performance/history");
-    expect(await screen.findByTestId("url")).toHaveTextContent("/me");
+    expect(await screen.findByTestId("url")).toHaveTextContent(/^\/me$/);
   });
 
   it("is not redirected when they have legacy history but no real history", async () => {
@@ -320,6 +328,7 @@ describe("an intern with nothing to show", () => {
 it("an intern currently in an active cycle is not redirected", async () => {
   isIntern();
   hasLead("lead@wso2.com");
+  hasActiveCycle();
   show();
   expect(await screen.findByRole("tab", { name: "Employee Feedback" })).toBeInTheDocument();
 });

@@ -259,6 +259,7 @@ export function usePerspectiveVisibility(): PerspectiveVisibility {
     infraGate.isResolving ||
     parLeadPortalGate.isLoading ||
     parAdminPortalGate.isLoading ||
+    parEmployeeItemGate.isLoading ||
     umtGate.isResolving;
 
   const isError =
