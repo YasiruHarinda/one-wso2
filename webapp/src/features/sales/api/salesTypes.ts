@@ -18,7 +18,7 @@
 // Ballerina records rather than from the standalone webapp's Redux slice, so
 // the field names here are the ones actually on the wire.
 //
-// See docs/ported-apps/revops-meetings.md §5 for the contract.
+// See docs/ported-apps/sales-meetings.md §5 for the contract.
 
 /** `meeting_status` — whether the calendar event still stands. */
 export type MeetingStatus = "ACTIVE" | "CANCELLED";
@@ -35,7 +35,7 @@ export interface Meeting {
   title: string;
   googleEventId: string;
   host: string;
-  /** Naive datetime string, no zone suffix — always UTC. See util/revOpsTime. */
+  /** Naive datetime string, no zone suffix — always UTC. See util/salesTime. */
   startTime: string;
   endTime: string;
   /** Comma-separated emails, not an array. Split for display only. */
@@ -226,11 +226,11 @@ export interface Regions {
 }
 
 /**
- * `GET /user-info`. `privileges` is what useRevOpsGate reads; the rest is here
+ * `GET /user-info`. `privileges` is what useSalesGate reads; the rest is here
  * because the same response identifies the caller for the host comparison that
  * decides whether Delete is offered.
  */
-export interface RevOpsUserInfo {
+export interface SalesUserInfo {
   employeeId: string;
   firstName: string;
   lastName: string;
@@ -246,7 +246,7 @@ export interface RevOpsUserInfo {
  * and 987 an ordinary member of the team; a caller with neither is refused by
  * the backend on every endpoint.
  */
-export const REVOPS_PRIVILEGE = {
+export const SALES_PRIVILEGE = {
   ADMIN: 762,
   TEAM: 987,
 } as const;

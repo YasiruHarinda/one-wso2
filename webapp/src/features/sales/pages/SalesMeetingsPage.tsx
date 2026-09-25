@@ -17,16 +17,16 @@
 import { useState } from "react";
 import { Alert, Box } from "@wso2/oxygen-ui";
 import { useNotifications } from "@context/notifications/NotificationsContext";
-import RevOpsShell from "../components/RevOpsShell";
+import SalesShell from "../components/SalesShell";
 import MeetingFilters from "../components/MeetingFilters";
 import MeetingsTable from "../components/MeetingsTable";
 import AttachmentsDialog from "../components/AttachmentsDialog";
 import CancelMeetingDialog from "../components/CancelMeetingDialog";
-import type { Meeting, MeetingScope } from "../api/revOpsTypes";
-import { isRevOpsBackendConfigured, useRevOpsRegions, useMeetings } from "../api/useRevOpsData";
-import { useRevOpsGate } from "../api/useRevOpsGate";
-import { useCancelMeeting } from "../api/useRevOpsMutations";
-import { describeError, isForbidden } from "../util/revOpsError";
+import type { Meeting, MeetingScope } from "../api/salesTypes";
+import { isSalesBackendConfigured, useSalesRegions, useMeetings } from "../api/useSalesData";
+import { useSalesGate } from "../api/useSalesGate";
+import { useCancelMeeting } from "../api/useSalesMutations";
+import { describeError, isForbidden } from "../util/salesError";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -36,10 +36,10 @@ const DEFAULT_PAGE_SIZE = 10;
  * Ported from meet-app's Meeting History tab. Create Meeting and the Dashboard
  * are deliberately not here: scheduling still happens in the calendar add-on,
  * and the analytics screen was not part of this migration. See
- * docs/ported-apps/revops-meetings.md.
+ * docs/ported-apps/sales-meetings.md.
  */
-export default function RevOpsMeetingsPage() {
-  const configured = isRevOpsBackendConfigured();
+export default function SalesMeetingsPage() {
+  const configured = isSalesBackendConfigured();
 
   const [scope, setScope] = useState<MeetingScope>("past");
   const [region, setRegion] = useState<string | null>(null);
@@ -52,8 +52,8 @@ export default function RevOpsMeetingsPage() {
   const [cancelError, setCancelError] = useState<string | null>(null);
 
   const { showSuccess } = useNotifications();
-  const gate = useRevOpsGate();
-  const regionsQuery = useRevOpsRegions();
+  const gate = useSalesGate();
+  const regionsQuery = useSalesRegions();
   const cancelMeeting = useCancelMeeting();
 
   // "Past" means "already ended". The cutoff instant is NOT computed here: it belongs to
@@ -118,7 +118,7 @@ export default function RevOpsMeetingsPage() {
   };
 
   return (
-    <RevOpsShell
+    <SalesShell
       title="Sales"
       subtitle="Meetings recorded across the sales team."
       configured={configured}
@@ -176,6 +176,6 @@ export default function RevOpsMeetingsPage() {
         pending={cancelMeeting.isPending}
         error={cancelError}
       />
-    </RevOpsShell>
+    </SalesShell>
   );
 }

@@ -20,7 +20,7 @@
 // cannot serve the previous user's meetings from cache — the list is filtered
 // by the caller's own access, so the rows themselves are user-specific.
 //
-// See docs/ported-apps/revops-meetings.md §5 for the contract.
+// See docs/ported-apps/sales-meetings.md §5 for the contract.
 
 import { useQuery } from "@tanstack/react-query";
 import { useAsgardeo } from "@asgardeo/react";
@@ -28,31 +28,31 @@ import { authedGet } from "@api/http";
 import { useAccessToken } from "@hooks/useAccessToken";
 import {
   buildMeetingsUrl,
-  revOpsServiceUrls,
-  isRevOpsBackendConfigured,
+  salesServiceUrls,
+  isSalesBackendConfigured,
 } from "@config/apiConfig";
 import { foldIdentityError, useAsgardeoSub } from "@hooks/useAsgardeoSub";
-import { revOpsRetry } from "../util/revOpsError";
+import { salesRetry } from "../util/salesError";
 import type {
   AttachmentList,
-  RevOpsUserInfo,
+  SalesUserInfo,
   Meeting,
   MeetingList,
   PlaybackUrl,
   Regions,
   SmartNotes,
   Transcript,
-} from "./revOpsTypes";
+} from "./salesTypes";
 
-export { isRevOpsBackendConfigured };
+export { isSalesBackendConfigured };
 
 /** Everything every query here needs, gathered once. */
-function useRevOpsQueryBasis() {
+function useSalesQueryBasis() {
   const { isSignedIn } = useAsgardeo();
   const getAccessToken = useAccessToken();
   const { state: subState, retry: retryIdentity } = useAsgardeoSub();
   const userSub = subState.status === "ready" ? subState.sub : undefined;
-  const ready = isSignedIn && isRevOpsBackendConfigured() && Boolean(userSub);
+  const ready = isSignedIn && isSalesBackendConfigured() && Boolean(userSub);
   return { getAccessToken, subState, retryIdentity, userSub, ready };
 }
 
@@ -63,14 +63,14 @@ function useRevOpsQueryBasis() {
  * the service refuses every endpoint in that case — so the page asks this one
  * question rather than showing four copies of the same refusal.
  */
-export function useRevOpsUserInfo() {
-  const { getAccessToken, subState, retryIdentity, userSub, ready } = useRevOpsQueryBasis();
-  const query = useQuery<RevOpsUserInfo>({
-    queryKey: ["revops-user-info", userSub],
+export function useSalesUserInfo() {
+  const { getAccessToken, subState, retryIdentity, userSub, ready } = useSalesQueryBasis();
+  const query = useQuery<SalesUserInfo>({
+    queryKey: ["sales-user-info", userSub],
     enabled: ready,
-    queryFn: async () => authedGet<RevOpsUserInfo>(revOpsServiceUrls.userInfo, await getAccessToken()),
+    queryFn: async () => authedGet<SalesUserInfo>(salesServiceUrls.userInfo, await getAccessToken()),
     staleTime: 5 * 60 * 1000,
-    retry: revOpsRetry,
+    retry: salesRetry,
   });
   return foldIdentityError(query, subState, retryIdentity);
 }
@@ -82,16 +82,16 @@ export function useRevOpsUserInfo() {
  * call succeeds at all depends on the caller's group, so a 403 cached under a
  * shared key would follow the next account into the tab.
  */
-export function useRevOpsRegions() {
-  const { getAccessToken, userSub, ready } = useRevOpsQueryBasis();
+export function useSalesRegions() {
+  const { getAccessToken, userSub, ready } = useSalesQueryBasis();
   return useQuery<Regions>({
-    queryKey: ["revops-regions", userSub],
+    queryKey: ["sales-regions", userSub],
     enabled: ready,
-    queryFn: async () => authedGet<Regions>(revOpsServiceUrls.regions, await getAccessToken()),
+    queryFn: async () => authedGet<Regions>(salesServiceUrls.regions, await getAccessToken()),
     // Regions change about never; an hour keeps the filter from re-fetching on
     // every visit to the page.
     staleTime: 60 * 60 * 1000,
-    retry: revOpsRetry,
+    retry: salesRetry,
   });
 }
 
@@ -126,14 +126,14 @@ export interface MeetingsQueryParams {
  * cancelled meeting as active for as long as the tab stayed open.
  */
 export function useMeetings(params: MeetingsQueryParams) {
-  const { getAccessToken, subState, retryIdentity, userSub, ready } = useRevOpsQueryBasis();
+  const { getAccessToken, subState, retryIdentity, userSub, ready } = useSalesQueryBasis();
   const { search, region, pastOnly, page, pageSize } = params;
 
   const query = useQuery<MeetingList>({
     // `pastOnly`, not the instant it resolves to: an exact timestamp in the key would
     // make every render a new key. Freshness comes from staleTime instead -- each refetch
     // recomputes the cutoff below.
-    queryKey: ["revops-meetings", userSub, search, region, pastOnly, page, pageSize],
+    queryKey: ["sales-meetings", userSub, search, region, pastOnly, page, pageSize],
     enabled: ready,
     queryFn: async () =>
       authedGet<MeetingList>(
@@ -157,7 +157,7 @@ export function useMeetings(params: MeetingsQueryParams) {
     placeholderData: (previous, previousQuery) =>
       previousQuery?.queryKey[1] === userSub ? previous : undefined,
     
-    retry: revOpsRetry,
+    retry: salesRetry,
   });
   return foldIdentityError(query, subState, retryIdentity);
 }
@@ -174,17 +174,17 @@ export function useMeetings(params: MeetingsQueryParams) {
  * prefetched for every visible row.
  */
 export function useMeetingAttachments(meetingId: number | null) {
-  const { getAccessToken, userSub, ready } = useRevOpsQueryBasis();
+  const { getAccessToken, userSub, ready } = useSalesQueryBasis();
   return useQuery<AttachmentList>({
-    queryKey: ["revops-attachments", userSub, meetingId],
+    queryKey: ["sales-attachments", userSub, meetingId],
     enabled: ready && meetingId !== null,
     queryFn: async () =>
       authedGet<AttachmentList>(
-        revOpsServiceUrls.attachments(meetingId as number),
+        salesServiceUrls.attachments(meetingId as number),
         await getAccessToken(),
       ),
     staleTime: 5 * 60 * 1000,
-    retry: revOpsRetry,
+    retry: salesRetry,
   });
 }
 
@@ -201,13 +201,13 @@ export function useMeetingAttachments(meetingId: number | null) {
  * recording attached yet) and 403 (not your meeting) 
  */
 export function useRecordingPlayback(meetingId: number | null) {
-  const { getAccessToken, userSub, ready } = useRevOpsQueryBasis();
+  const { getAccessToken, userSub, ready } = useSalesQueryBasis();
   return useQuery<PlaybackUrl>({
-    queryKey: ["revops-playback", userSub, meetingId],
+    queryKey: ["sales-playback", userSub, meetingId],
     enabled: ready && meetingId !== null,
     queryFn: async () =>
       authedGet<PlaybackUrl>(
-        revOpsServiceUrls.playback(meetingId as number),
+        salesServiceUrls.playback(meetingId as number),
         await getAccessToken(),
       ),
     staleTime: 0,
@@ -224,17 +224,17 @@ export function useRecordingPlayback(meetingId: number | null) {
  * when you arrived by clicking would be a page that breaks exactly when someone shares it.
  */
 export function useMeeting(meetingId: number | null) {
-  const { getAccessToken, subState, retryIdentity, userSub, ready } = useRevOpsQueryBasis();
+  const { getAccessToken, subState, retryIdentity, userSub, ready } = useSalesQueryBasis();
   const query = useQuery<Meeting>({
-    queryKey: ["revops-meeting", userSub, meetingId],
+    queryKey: ["sales-meeting", userSub, meetingId],
     enabled: ready && meetingId !== null,
     queryFn: async () =>
       authedGet<Meeting>(
-        revOpsServiceUrls.meetingById(meetingId as number),
+        salesServiceUrls.meetingById(meetingId as number),
         await getAccessToken(),
       ),
     staleTime: 60 * 1000,
-    retry: revOpsRetry,
+    retry: salesRetry,
   });
   return foldIdentityError(query, subState, retryIdentity);
 }
@@ -248,12 +248,12 @@ export function useMeeting(meetingId: number | null) {
  * yours), both final.
  */
 export function useTranscript(meetingId: number | null) {
-  const { getAccessToken, userSub, ready } = useRevOpsQueryBasis();
+  const { getAccessToken, userSub, ready } = useSalesQueryBasis();
   return useQuery<Transcript>({
-    queryKey: ["revops-transcript", userSub, meetingId],
+    queryKey: ["sales-transcript", userSub, meetingId],
     enabled: ready && meetingId !== null,
     queryFn: async () =>
-      authedGet<Transcript>(revOpsServiceUrls.transcript(meetingId as number), await getAccessToken()),
+      authedGet<Transcript>(salesServiceUrls.transcript(meetingId as number), await getAccessToken()),
     // A finished meeting's transcript never changes, so it is worth holding for the visit.
     staleTime: 30 * 60 * 1000,
     retry: false,
@@ -262,12 +262,12 @@ export function useTranscript(meetingId: number | null) {
 
 /** The smart notes, as plain text. Same gating and reasoning as useTranscript. */
 export function useSmartNotes(meetingId: number | null) {
-  const { getAccessToken, userSub, ready } = useRevOpsQueryBasis();
+  const { getAccessToken, userSub, ready } = useSalesQueryBasis();
   return useQuery<SmartNotes>({
-    queryKey: ["revops-smart-notes", userSub, meetingId],
+    queryKey: ["sales-smart-notes", userSub, meetingId],
     enabled: ready && meetingId !== null,
     queryFn: async () =>
-      authedGet<SmartNotes>(revOpsServiceUrls.smartNotes(meetingId as number), await getAccessToken()),
+      authedGet<SmartNotes>(salesServiceUrls.smartNotes(meetingId as number), await getAccessToken()),
     staleTime: 30 * 60 * 1000,
     retry: false,
   });

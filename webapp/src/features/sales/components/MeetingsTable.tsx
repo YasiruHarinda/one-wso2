@@ -30,9 +30,9 @@ import {
   PaperclipIcon,
   Trash2Icon,
 } from "@wso2/oxygen-ui-icons-react";
-import type { Meeting, MeetingScope } from "../api/revOpsTypes";
-import { meetingCustomer, meetingTypeLabel } from "../api/revOpsTypes";
-import { formatDateTime } from "../util/revOpsTime";
+import type { Meeting, MeetingScope } from "../api/salesTypes";
+import { meetingCustomer, meetingTypeLabel } from "../api/salesTypes";
+import { formatDateTime } from "../util/salesTime";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 

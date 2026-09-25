@@ -16,8 +16,8 @@
 
 import { Alert, Box, Skeleton, Typography } from "@wso2/oxygen-ui";
 import { HttpError } from "@api/http";
-import { useSmartNotes } from "../api/useRevOpsData";
-import { describeError } from "../util/revOpsError";
+import { useSmartNotes } from "../api/useSalesData";
+import { describeError } from "../util/salesError";
 
 /**
  * Gemini's notes for the call.

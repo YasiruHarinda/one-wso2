@@ -19,7 +19,7 @@ import {
   formatDateTime,
   parseUtc,
   splitParticipants,
-} from "./revOpsTime";
+} from "./salesTime";
 
 describe("parseUtc", () => {
   it("reads the backend's naive datetime as UTC, not as local time", () => {

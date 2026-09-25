@@ -30,19 +30,19 @@ import {
   Tabs,
   Typography,
 } from "@wso2/oxygen-ui";
-import { isRevOpsBackendConfigured, useMeeting } from "../api/useRevOpsData";
+import { isSalesBackendConfigured, useMeeting } from "../api/useSalesData";
 import {
   meetingCustomer,
   meetingTypeLabel,
   parseOpportunityDetails,
-} from "../api/revOpsTypes";
-import RevOpsShell from "../components/RevOpsShell";
+} from "../api/salesTypes";
+import SalesShell from "../components/SalesShell";
 import RecordingPlayer, { type RecordingPlayerHandle } from "../components/RecordingPlayer";
 import TranscriptPanel from "../components/TranscriptPanel";
 import SmartNotesPanel from "../components/SmartNotesPanel";
 import SpeakerTimeline from "../components/SpeakerTimeline";
-import { describeError, isForbidden } from "../util/revOpsError";
-import { formatDateTime, splitParticipants } from "../util/revOpsTime";
+import { describeError, isForbidden } from "../util/salesError";
+import { formatDateTime, splitParticipants } from "../util/salesTime";
 
 /**
  * One meeting: the recording, and the context around it.
@@ -62,7 +62,7 @@ export default function MeetingDetailPage() {
   const meetingId = Number(rawId);
   const validId = Number.isInteger(meetingId) && meetingId > 0;
 
-  const configured = isRevOpsBackendConfigured();
+  const configured = isSalesBackendConfigured();
   const playerRef = useRef<RecordingPlayerHandle>(null);
   // Held here rather than inside the transcript: the player owns the position, and the
   // transcript is one of possibly several things that want to know it.
@@ -102,7 +102,7 @@ export default function MeetingDetailPage() {
   const deal = parseOpportunityDetails(meeting?.opportunityDetails);
 
   return (
-    <RevOpsShell
+    <SalesShell
       title={meeting?.title ?? "Meeting"}
       configured={configured}
       configKey="ONE_WSO2_REVOPS_BACKEND_URL"
@@ -236,7 +236,7 @@ export default function MeetingDetailPage() {
           </Box>
         </Box>
       ) : null}
-    </RevOpsShell>
+    </SalesShell>
   );
 }
 

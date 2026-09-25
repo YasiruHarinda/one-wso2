@@ -25,9 +25,9 @@ import {
 } from "@wso2/oxygen-ui";
 import { SearchIcon } from "@wso2/oxygen-ui-icons-react";
 import { HttpError } from "@api/http";
-import { formatOffset } from "../api/revOpsTypes";
-import { useTranscript } from "../api/useRevOpsData";
-import { describeError } from "../util/revOpsError";
+import { formatOffset } from "../api/salesTypes";
+import { useTranscript } from "../api/useSalesData";
+import { describeError } from "../util/salesError";
 
 /**
  * The conversation, with every line a way into the recording.
@@ -35,9 +35,6 @@ import { describeError } from "../util/revOpsError";
  * Clicking a line seeks the video to where it was said. That is the whole reason the player
  * is a native <video> rather than a Drive iframe: an iframe would show the recording but
  * expose no way to set its position, so this interaction would be impossible.
- *
- * `onSeek` is passed in rather than the video ref, so this component knows nothing about
- * how playback works — it reports which second the reader asked for.
  */
 export default function TranscriptPanel({
   meetingId,
@@ -111,10 +108,6 @@ export default function TranscriptPanel({
         onChange={(e) => setQuery(e.target.value)}
         sx={{ mb: 1.5 }}
         slotProps={{
-          // A placeholder is not an accessible name: it disappears on focus and is
-          // not reliably announced. The field is labelled by its icon visually, so
-          // the name goes here rather than as a visible <label>.
-          htmlInput: { "aria-label": "Search transcript" },
           input: {
             startAdornment: (
               <InputAdornment position="start">

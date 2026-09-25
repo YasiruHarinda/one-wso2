@@ -18,7 +18,7 @@ import { describe, expect, it, vi } from "vitest";
 import { RadioIcon } from "@wso2/oxygen-ui-icons-react";
 import type { PerspectiveDef } from "@constants/perspectives";
 
-// Stubbed with factories for the same reason PerspectiveLanding.test.tsx does: RevOpsShell
+// Stubbed with factories for the same reason PerspectiveLanding.test.tsx does: SalesShell
 // imports NothingHere from PerspectiveLanding, whose visibility hook pulls @asgardeo/browser
 // into the module graph, and that package does not resolve under vitest's ESM loader.
 vi.mock("@components/side-rail/usePerspectiveVisibility", () => ({
@@ -30,32 +30,32 @@ vi.mock("@components/side-rail/usePerspectiveVisibility", () => ({
     retry: () => {},
   }),
 }));
-const revops: PerspectiveDef = {
-  key: "revops",
+const sales: PerspectiveDef = {
+  key: "sales",
   label: "Sales",
   icon: RadioIcon,
   access: true,
   path: "/sales",
 };
 vi.mock("@context/perspective/PerspectiveContext", () => ({
-  useActivePerspective: () => revops,
+  useActivePerspective: () => sales,
 }));
 
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import RevOpsShell from "./RevOpsShell";
+import SalesShell from "./SalesShell";
 
 function renderShell(props: { configured: boolean; forbidden?: boolean }) {
   return render(
     <MemoryRouter>
-      <RevOpsShell title="Sales" configKey="ONE_WSO2_REVOPS_BACKEND_URL" {...props}>
+      <SalesShell title="Sales" configKey="ONE_WSO2_REVOPS_BACKEND_URL" {...props}>
         <div>meeting list</div>
-      </RevOpsShell>
+      </SalesShell>
     </MemoryRouter>,
   );
 }
 
-describe("RevOpsShell", () => {
+describe("SalesShell", () => {
   it("says Sales is not connected, and names the key to set, when no backend URL is configured", () => {
     renderShell({ configured: false });
     expect(screen.getByText(/Sales isn't connected yet/)).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe("RevOpsShell", () => {
   });
 
   // The backend answers 403 on every endpoint for a caller in no authorised group; the page
-  // shows the same "nothing here" card as every other perspective, not a RevOps-only refusal.
+  // shows the same "nothing here" card as every other perspective, not a Sales-only refusal.
   it("shows the shared no-access card, with a way home, when the backend refuses the caller", () => {
     renderShell({ configured: true, forbidden: true });
     expect(screen.getByRole("heading", { name: "Nothing here for you yet" })).toBeInTheDocument();
@@ -76,6 +76,7 @@ describe("RevOpsShell", () => {
   it("never says Echo or RevOps -- the product is Sales on every state of the page", () => {
     for (const props of [{ configured: false }, { configured: true, forbidden: true }]) {
       const { container, unmount } = renderShell(props);
+      // The product's former names -- neither may reach the page.
       expect(container.textContent).not.toMatch(/Echo|RevOps/);
       unmount();
     }

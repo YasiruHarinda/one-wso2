@@ -30,7 +30,7 @@ import { useActivePerspective } from "@context/perspective/PerspectiveContext";
  * nothing to request at all, so the filters and table would be furniture around
  * an empty room.
  */
-export default function RevOpsShell({
+export default function SalesShell({
   title,
   subtitle,
   configured,

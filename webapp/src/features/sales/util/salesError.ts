@@ -28,7 +28,7 @@ import { describeError, httpRetry } from "@api/errors";
 export { describeError };
 
 /** No retries on 4xx — a 403 on someone else's meeting will not improve. */
-export const revOpsRetry = httpRetry;
+export const salesRetry = httpRetry;
 
 /**
  * True when the failure is the backend refusing this caller outright.

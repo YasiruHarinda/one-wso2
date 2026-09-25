@@ -24,7 +24,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@wso2/oxygen-ui";
-import type { Meeting } from "../api/revOpsTypes";
+import type { Meeting } from "../api/salesTypes";
 
 /**
  * Confirms cancelling a meeting.
