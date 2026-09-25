@@ -147,4 +147,11 @@ describe("per-user preference", () => {
     setLandingPreference("csm");
     expect(landingPreference()).toBeUndefined();
   });
+
+  // Sales was called RevOps, with the key "revops": a landing choice saved before the rename
+  // must still be honoured rather than silently reset to Me.
+  it("keeps a landing choice saved under a renamed perspective's old key", () => {
+    localStorage.setItem("one-wso2.landing", "revops");
+    expect(landingPreference()).toBe("sales");
+  });
 });

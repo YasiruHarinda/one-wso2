@@ -29,7 +29,7 @@ import path from "path";
 // token exchange + Drive API calls they make, and frame-src for the
 // Picker's own iframe (hosted on docs.google.com, not inline).
 //
-// RevOps plays meeting recordings in a <video> streamed straight from drive-service's
+// Sales plays meeting recordings in a <video> streamed straight from drive-service's
 // internal Choreo endpoint (meet-app-backend's `playbackBaseUrl`), whose host differs per
 // environment — so media-src takes a wildcard. 
 const CSP = [

@@ -116,7 +116,7 @@ function PageTitle({ label }: { label: string }): JSX.Element {
 // generic glyph wouldn't.
 //
 // Exported so a perspective that learns "nothing for you" from its backend rather than from
-// the rail (RevOps: meet-app answers 403) shows the same card, not its own variant of it.
+// the rail (Sales: meet-app answers 403) shows the same card, not its own variant of it.
 export function NothingHere({
   label,
   icon: Icon,

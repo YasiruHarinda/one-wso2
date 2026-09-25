@@ -356,12 +356,12 @@ const UMT_SECTIONS: PerspectiveSection[] = [
  * ask useUmtGate directly rather than reading `requires` for them.
  */
 export const UMT_ADMIN_ITEM_IDS: ReadonlySet<string> = new Set(["umt-products"]);
-// RevOps's rail. One entry today — the meeting history — but a list rather than
+// Sales's rail. One entry today — the meeting history — but a list rather than
 // nothing, because the rail is how you get back to the screen from a deep link
 // and because the detail view for a single recording lands next to it next.
-const REVOPS_SECTIONS: PerspectiveSection[] = [
+const SALES_SECTIONS: PerspectiveSection[] = [
   {
-    id: "revops-meetings",
+    id: "sales-meetings",
     label: "Meetings",
     // NOT RadioIcon, which belongs to the perspective itself. SideRail renders
     // the Overview row with `active.icon`, so a section reusing the perspective
@@ -417,7 +417,7 @@ export interface PerspectiveDef {
    * person's own profile, which is a page someone stops and reads.
    *
    * ALSO covers the near case where the landing does not forward because it
-   * already IS the first row's destination -- RevOps, whose Meetings row points
+   * already IS the first row's destination -- Sales, whose Meetings row points
    * at `/sales` itself. The reason differs (nothing bounces) but the rail
    * problem is identical: two rows, one destination, and the reader has to work
    * out that they are the same place. The name is kept rather than split into a
@@ -498,7 +498,7 @@ export const PERSPECTIVES: readonly PerspectiveDef[] = [
     access: isCsmConfigured(),
     externalUrl: csmUrl || undefined,
   },
-  // RevOps — auto-recorded meetings. One screen so far: the meeting history
+  // Sales — auto-recorded meetings. One screen so far: the meeting history
   // ported from meet-app. Create Meeting stayed behind (scheduling happens in
   // the calendar add-on) and the analytics dashboard was out of scope.
   //
@@ -511,23 +511,23 @@ export const PERSPECTIVES: readonly PerspectiveDef[] = [
   //
   // `access: true` regardless of whether the backend URL is set, unlike CSM
   // just above. The difference is that CSM is somewhere else — with no URL its
-  // tile could only ever be a link to nowhere — whereas RevOps is a page we host,
+  // tile could only ever be a link to nowhere — whereas Sales is a page we host,
   // and that page explains its own not-connected state. Menu is the precedent:
   // it stays in the rail unconfigured and says what is missing, which is how an
   // operator finds out a key is unset. Hiding it instead would make a missing
   // config indistinguishable from a feature that was never built.
   //
-  // `isRevOpsBackendConfigured` is still imported and used by the page itself; it
+  // `isSalesBackendConfigured` is still imported and used by the page itself; it
   // just doesn't decide visibility.
   {
-    key: "revops",
+    key: "sales",
     label: "Sales",
     icon: RadioIcon,
     access: true,
     externallyGated: true,
     forwardsToFirstItem: true,
     path: "/sales",
-    sections: REVOPS_SECTIONS,
+    sections: SALES_SECTIONS,
   },
   // Held behind a preview flag, whole perspective and all, until it's ready
   // for production. With the flag off the entry does not exist, so the waffle,
@@ -667,4 +667,20 @@ export function findPerspectiveByPath(pathname: string): PerspectiveDef | undefi
 
 export function findPerspectiveByKey(key: string): PerspectiveDef | undefined {
   return PERSPECTIVES.find((p) => p.key === key);
+}
+
+/**
+ * Perspective keys that have been renamed, old → new.
+ *
+ * Favourites and the landing choice are saved in the browser BY KEY, so a renamed key would
+ * otherwise read back as unknown and be silently dropped — the user's favourite tile or chosen
+ * landing page would just disappear. Reading a saved key through currentPerspectiveKey maps it
+ * to its new name instead. A Map rather than an object so a saved value like "toString" cannot
+ * match an inherited property.
+ */
+const RENAMED_PERSPECTIVE_KEYS: ReadonlyMap<string, string> = new Map([["revops", "sales"]]);
+
+/** The current key for a possibly-renamed saved key; unrenamed keys pass through unchanged. */
+export function currentPerspectiveKey(key: string): string {
+  return RENAMED_PERSPECTIVE_KEYS.get(key) ?? key;
 }
