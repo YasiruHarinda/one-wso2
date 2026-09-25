@@ -49,7 +49,7 @@ import { formatDateTime, splitParticipants } from "../util/revOpsTime";
  *
  * A ROUTE rather than a dialog, which is the whole point of moving it here. A recording is
  * something people send each other -- "watch the first ten minutes of this" -- and a dialog
- * has no address. This does: /revops/meetings/42 survives a refresh, a bookmark and a
+ * has no address. This does: /sales/meetings/42 survives a refresh, a bookmark and a
  * paste into Slack, because the page resolves itself from the id rather than from whatever
  * the list happened to be holding.
  *
@@ -109,7 +109,7 @@ export default function MeetingDetailPage() {
       forbidden={forbidden}
     >
       <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to="/revops" underline="hover" color="inherit">
+        <Link component={RouterLink} to="/sales" underline="hover" color="inherit">
           Meetings
         </Link>
         <Typography color="text.primary" variant="body2">

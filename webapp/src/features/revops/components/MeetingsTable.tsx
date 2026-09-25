@@ -144,7 +144,7 @@ export default function MeetingsTable({
                               cancel buttons sitting in it. */}
                           <Link
                             component={RouterLink}
-                            to={`/revops/meetings/${meeting.meetingId}`}
+                            to={`/sales/meetings/${meeting.meetingId}`}
                             underline="hover"
                             variant="body2"
                             sx={{
