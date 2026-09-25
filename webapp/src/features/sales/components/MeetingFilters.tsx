@@ -29,7 +29,7 @@ import {
   TextField,
 } from "@wso2/oxygen-ui";
 import { SearchIcon, XIcon } from "@wso2/oxygen-ui-icons-react";
-import type { MeetingScope } from "../api/revOpsTypes";
+import type { MeetingScope } from "../api/salesTypes";
 
 const ALL_REGIONS = "__all__";
 
@@ -126,9 +126,9 @@ export default function MeetingFilters({
       </RadioGroup>
 
       <FormControl size="small" sx={{ minWidth: 180 }} disabled={disabled || regionsLoading}>
-        <InputLabel id="revops-region-label">Region</InputLabel>
+        <InputLabel id="sales-region-label">Region</InputLabel>
         <Select
-          labelId="revops-region-label"
+          labelId="sales-region-label"
           label="Region"
           value={region ?? ALL_REGIONS}
           onChange={(event) => {

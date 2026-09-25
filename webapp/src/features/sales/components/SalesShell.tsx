@@ -30,7 +30,7 @@ import { useActivePerspective } from "@context/perspective/PerspectiveContext";
  * nothing to request at all, so the filters and table would be furniture around
  * an empty room.
  */
-export default function RevOpsShell({
+export default function SalesShell({
   title,
   subtitle,
   configured,
@@ -53,7 +53,7 @@ export default function RevOpsShell({
 
       {!configured ? (
         <Alert severity="info" sx={{ mt: 1.5 }}>
-          RevOps isn&apos;t connected yet. Set <code>{configKey}</code> in{" "}
+          Sales isn&apos;t connected yet. Set <code>{configKey}</code> in{" "}
           <code>public/config.js</code> (the meet-app backend URL) and reload.
         </Alert>
       ) : forbidden ? (

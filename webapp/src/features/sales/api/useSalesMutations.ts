@@ -26,7 +26,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authedDelete } from "@api/http";
 import { useAccessToken } from "@hooks/useAccessToken";
-import { revOpsServiceUrls } from "@config/apiConfig";
+import { salesServiceUrls } from "@config/apiConfig";
 
 /**
  * DELETE /meetings/{id} — cancels the meeting and its calendar event.
@@ -40,10 +40,10 @@ export function useCancelMeeting() {
   const qc = useQueryClient();
   return useMutation<void, Error, number>({
     mutationFn: async (meetingId) => {
-      await authedDelete(revOpsServiceUrls.meeting(meetingId), await getAccessToken());
+      await authedDelete(salesServiceUrls.meeting(meetingId), await getAccessToken());
     },
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["revops-meetings"] });
+      await qc.invalidateQueries({ queryKey: ["sales-meetings"] });
     },
   });
 }

@@ -356,12 +356,12 @@ const UMT_SECTIONS: PerspectiveSection[] = [
  * ask useUmtGate directly rather than reading `requires` for them.
  */
 export const UMT_ADMIN_ITEM_IDS: ReadonlySet<string> = new Set(["umt-products"]);
-// RevOps's rail. One entry today — the meeting history — but a list rather than
+// Sales's rail. One entry today — the meeting history — but a list rather than
 // nothing, because the rail is how you get back to the screen from a deep link
 // and because the detail view for a single recording lands next to it next.
-const REVOPS_SECTIONS: PerspectiveSection[] = [
+const SALES_SECTIONS: PerspectiveSection[] = [
   {
-    id: "revops-meetings",
+    id: "sales-meetings",
     label: "Meetings",
     // NOT RadioIcon, which belongs to the perspective itself. SideRail renders
     // the Overview row with `active.icon`, so a section reusing the perspective
@@ -369,7 +369,7 @@ const REVOPS_SECTIONS: PerspectiveSection[] = [
     // scannable. Video reads as "recorded call" and its solid rectangle is the
     // strongest silhouette contrast against Radio's arcs at 20px.
     icon: VideoIcon,
-    path: "/revops",
+    path: "/sales",
   },
 ];
 
@@ -417,8 +417,8 @@ export interface PerspectiveDef {
    * person's own profile, which is a page someone stops and reads.
    *
    * ALSO covers the near case where the landing does not forward because it
-   * already IS the first row's destination -- RevOps, whose Meetings row points
-   * at `/revops` itself. The reason differs (nothing bounces) but the rail
+   * already IS the first row's destination -- Sales, whose Meetings row points
+   * at `/sales` itself. The reason differs (nothing bounces) but the rail
    * problem is identical: two rows, one destination, and the reader has to work
    * out that they are the same place. The name is kept rather than split into a
    * second near-identical flag.
@@ -498,7 +498,7 @@ export const PERSPECTIVES: readonly PerspectiveDef[] = [
     access: isCsmConfigured(),
     externalUrl: csmUrl || undefined,
   },
-  // RevOps — auto-recorded meetings. One screen so far: the meeting history
+  // Sales — auto-recorded meetings. One screen so far: the meeting history
   // ported from meet-app. Create Meeting stayed behind (scheduling happens in
   // the calendar add-on) and the analytics dashboard was out of scope.
   //
@@ -511,23 +511,23 @@ export const PERSPECTIVES: readonly PerspectiveDef[] = [
   //
   // `access: true` regardless of whether the backend URL is set, unlike CSM
   // just above. The difference is that CSM is somewhere else — with no URL its
-  // tile could only ever be a link to nowhere — whereas RevOps is a page we host,
+  // tile could only ever be a link to nowhere — whereas Sales is a page we host,
   // and that page explains its own not-connected state. Menu is the precedent:
   // it stays in the rail unconfigured and says what is missing, which is how an
   // operator finds out a key is unset. Hiding it instead would make a missing
   // config indistinguishable from a feature that was never built.
   //
-  // `isRevOpsBackendConfigured` is still imported and used by the page itself; it
+  // `isSalesBackendConfigured` is still imported and used by the page itself; it
   // just doesn't decide visibility.
   {
-    key: "revops",
-    label: "RevOps",
+    key: "sales",
+    label: "Sales",
     icon: RadioIcon,
     access: true,
     externallyGated: true,
     forwardsToFirstItem: true,
-    path: "/revops",
-    sections: REVOPS_SECTIONS,
+    path: "/sales",
+    sections: SALES_SECTIONS,
   },
   // Held behind a preview flag, whole perspective and all, until it's ready
   // for production. With the flag off the entry does not exist, so the waffle,

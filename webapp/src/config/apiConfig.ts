@@ -1316,52 +1316,55 @@ export function isSecurityBackendConfigured(): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// RevOps backend. RevOps is the One WSO2 perspective for the call-review
+// Sales backend. Sales is the One WSO2 perspective for the call-review
 // experience; the service behind it is people-ops-suite's meet-app backend,
 // reused unchanged. The naming difference is deliberate and worth knowing: the
-// config key and everything in this app say "revops" because that is what a
+// config key and everything in this app say "sales" because that is what a
 // user opens, while the contract, the roles and the error messages all belong
-// to meet-app. See docs/ported-apps/revops-meetings.md.
-export const revOpsBackendUrl: string = window.config?.ONE_WSO2_REVOPS_BACKEND_URL ?? "";
+// to meet-app. See docs/ported-apps/sales-meetings.md.
+//
+// The config key keeps its original name, ONE_WSO2_REVOPS_BACKEND_URL, on purpose: it is set in
+// every environment's config.js, and renaming it would need each deployment changed in step.
+export const salesBackendUrl: string = window.config?.ONE_WSO2_REVOPS_BACKEND_URL ?? "";
 
-export function isRevOpsBackendConfigured(): boolean {
-  return Boolean(revOpsBackendUrl);
+export function isSalesBackendConfigured(): boolean {
+  return Boolean(salesBackendUrl);
 }
 
-export const revOpsServiceUrls = {
-  // Employee profile + privileges. The privileges array is what useRevOpsGate
+export const salesServiceUrls = {
+  // Employee profile + privileges. The privileges array is what useSalesGate
   // reads to tell a meet-app ADMIN from an ordinary TEAM member.
-  userInfo: `${revOpsBackendUrl}/user-info`,
+  userInfo: `${salesBackendUrl}/user-info`,
   // The regions the region filter offers. A bare string list, not objects.
-  regions: `${revOpsBackendUrl}/regions`,
+  regions: `${salesBackendUrl}/regions`,
   // The meeting list. Every filter is a query parameter and paging is
   // server-side, so the caller passes limit/offset rather than slicing a
   // full list client-side — see buildMeetingsUrl below.
-  meetings: `${revOpsBackendUrl}/meetings`,
+  meetings: `${salesBackendUrl}/meetings`,
   // Drive files attached to one meeting's calendar event: the recording, and
   // whatever else was attached. Returns links, never file content.
   attachments: (meetingId: number): string =>
-    `${revOpsBackendUrl}/meetings/${meetingId}/attachments`,
+    `${salesBackendUrl}/meetings/${meetingId}/attachments`,
   // Cancels a meeting. The backend refuses unless the caller is the host or a
   // meet-app admin, so the UI's own check is a courtesy, not the control.
-  meeting: (meetingId: number): string => `${revOpsBackendUrl}/meetings/${meetingId}`,
+  meeting: (meetingId: number): string => `${salesBackendUrl}/meetings/${meetingId}`,
   // One meeting, for the detail page. The list endpoint cannot serve a direct link: it is
   // paged and filtered, so the meeting asked for may be on no page the caller would fetch.
-  meetingById: (meetingId: number): string => `${revOpsBackendUrl}/meetings/${meetingId}`,
+  meetingById: (meetingId: number): string => `${salesBackendUrl}/meetings/${meetingId}`,
   // The conversation as timed, speaker-attributed lines — what a synchronised transcript
   // is built from. 404 when the meeting predates the transcript resource name being stored,
   // in which case there is only the Drive document.
   transcript: (meetingId: number): string =>
-    `${revOpsBackendUrl}/meetings/${meetingId}/transcript`,
+    `${salesBackendUrl}/meetings/${meetingId}/transcript`,
   // Gemini's notes, as plain text. Meet writes these only as a Google Doc.
   smartNotes: (meetingId: number): string =>
-    `${revOpsBackendUrl}/meetings/${meetingId}/smart-notes`,
+    `${salesBackendUrl}/meetings/${meetingId}/smart-notes`,
   // A signed, time-limited URL for streaming this meeting's recording. The URL it returns
   // points at drive-service, NOT here — streaming is deliberately not this backend's job.
   // 404 means either playback isn't configured or no recording is attached yet; the two
   // are distinguished by the message, and neither is an error worth a banner.
   playback: (meetingId: number): string =>
-    `${revOpsBackendUrl}/meetings/${meetingId}/playback`,
+    `${salesBackendUrl}/meetings/${meetingId}/playback`,
 };
 
 /**
@@ -1387,5 +1390,5 @@ export function buildMeetingsUrl(params: {
   if (params.endTime?.trim()) qs.set("endTime", params.endTime.trim());
   qs.set("limit", String(params.limit));
   qs.set("offset", String(params.offset));
-  return `${revOpsServiceUrls.meetings}?${qs.toString()}`;
+  return `${salesServiceUrls.meetings}?${qs.toString()}`;
 }

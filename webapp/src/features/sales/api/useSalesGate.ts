@@ -22,10 +22,10 @@
 // authorised group. 
 
 import { useMemo } from "react";
-import { REVOPS_PRIVILEGE, type Meeting } from "./revOpsTypes";
-import { useRevOpsUserInfo } from "./useRevOpsData";
+import { SALES_PRIVILEGE, type Meeting } from "./salesTypes";
+import { useSalesUserInfo } from "./useSalesData";
 
-export interface RevOpsGate {
+export interface SalesGate {
   /** True once /user-info has answered, either way. */
   isResolved: boolean;
   /** meet-app ADMIN (privilege 762). */
@@ -36,12 +36,12 @@ export interface RevOpsGate {
   canCancel: (meeting: Meeting) => boolean;
 }
 
-export function useRevOpsGate(): RevOpsGate {
-  const { data, isLoading } = useRevOpsUserInfo();
+export function useSalesGate(): SalesGate {
+  const { data, isLoading } = useSalesUserInfo();
 
   return useMemo(() => {
     const privileges = data?.privileges ?? [];
-    const isAdmin = privileges.includes(REVOPS_PRIVILEGE.ADMIN);
+    const isAdmin = privileges.includes(SALES_PRIVILEGE.ADMIN);
     const workEmail = data?.workEmail ?? null;
 
     return {

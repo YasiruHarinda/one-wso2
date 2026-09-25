@@ -31,9 +31,9 @@ import {
   Typography,
 } from "@wso2/oxygen-ui";
 import { ExternalLinkIcon, FileIcon } from "@wso2/oxygen-ui-icons-react";
-import type { Meeting } from "../api/revOpsTypes";
-import { useMeetingAttachments } from "../api/useRevOpsData";
-import { describeError } from "../util/revOpsError";
+import type { Meeting } from "../api/salesTypes";
+import { useMeetingAttachments } from "../api/useSalesData";
+import { describeError } from "../util/salesError";
 
 /**
  * The Drive files attached to one meeting.
@@ -41,7 +41,7 @@ import { describeError } from "../util/revOpsError";
  * These are LINKS, not content: the backend returns fileUrl/iconLink/mimeType
  * and nothing else, so the recording opens in Drive rather than playing here.
  * An in-app player needs endpoints that do not exist yet — see
- * docs/ported-apps/revops-meetings.md §7.
+ * docs/ported-apps/sales-meetings.md §7.
  */
 export default function AttachmentsDialog({
   meeting,

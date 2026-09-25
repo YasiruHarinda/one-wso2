@@ -30,9 +30,9 @@ import {
   PaperclipIcon,
   Trash2Icon,
 } from "@wso2/oxygen-ui-icons-react";
-import type { Meeting, MeetingScope } from "../api/revOpsTypes";
-import { meetingCustomer, meetingTypeLabel } from "../api/revOpsTypes";
-import { formatDateTime } from "../util/revOpsTime";
+import type { Meeting, MeetingScope } from "../api/salesTypes";
+import { meetingCustomer, meetingTypeLabel } from "../api/salesTypes";
+import { formatDateTime } from "../util/salesTime";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
@@ -144,7 +144,7 @@ export default function MeetingsTable({
                               cancel buttons sitting in it. */}
                           <Link
                             component={RouterLink}
-                            to={`/revops/meetings/${meeting.meetingId}`}
+                            to={`/sales/meetings/${meeting.meetingId}`}
                             underline="hover"
                             variant="body2"
                             sx={{
@@ -241,7 +241,7 @@ export default function MeetingsTable({
                             title={
                               cancellable
                                 ? "Cancel meeting"
-                                : "Only the host or a RevOps admin can cancel an upcoming meeting"
+                                : "Only the host or a Sales admin can cancel an upcoming meeting"
                             }
                             arrow
                           >

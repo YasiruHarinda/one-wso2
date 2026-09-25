@@ -17,8 +17,8 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
 import { Alert, Box, Button, Paper, Skeleton } from "@wso2/oxygen-ui";
 import { HttpError } from "@api/http";
-import { useRecordingPlayback } from "../api/useRevOpsData";
-import { describeError } from "../util/revOpsError";
+import { useRecordingPlayback } from "../api/useSalesData";
+import { describeError } from "../util/salesError";
 
 /**
  * The recording, played in the page.

@@ -16,8 +16,8 @@
 
 import { useMemo } from "react";
 import { Box, Skeleton, Tooltip, Typography, useTheme } from "@wso2/oxygen-ui";
-import { formatOffset, type TranscriptLine } from "../api/revOpsTypes";
-import { useTranscript } from "../api/useRevOpsData";
+import { formatOffset, type TranscriptLine } from "../api/salesTypes";
+import { useTranscript } from "../api/useSalesData";
 
 /**
  * Who spoke, when, and how much — one track per person under the recording.

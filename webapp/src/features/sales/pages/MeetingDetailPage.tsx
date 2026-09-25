@@ -30,26 +30,26 @@ import {
   Tabs,
   Typography,
 } from "@wso2/oxygen-ui";
-import { isRevOpsBackendConfigured, useMeeting } from "../api/useRevOpsData";
+import { isSalesBackendConfigured, useMeeting } from "../api/useSalesData";
 import {
   meetingCustomer,
   meetingTypeLabel,
   parseOpportunityDetails,
-} from "../api/revOpsTypes";
-import RevOpsShell from "../components/RevOpsShell";
+} from "../api/salesTypes";
+import SalesShell from "../components/SalesShell";
 import RecordingPlayer, { type RecordingPlayerHandle } from "../components/RecordingPlayer";
 import TranscriptPanel from "../components/TranscriptPanel";
 import SmartNotesPanel from "../components/SmartNotesPanel";
 import SpeakerTimeline from "../components/SpeakerTimeline";
-import { describeError, isForbidden } from "../util/revOpsError";
-import { formatDateTime, splitParticipants } from "../util/revOpsTime";
+import { describeError, isForbidden } from "../util/salesError";
+import { formatDateTime, splitParticipants } from "../util/salesTime";
 
 /**
  * One meeting: the recording, and the context around it.
  *
  * A ROUTE rather than a dialog, which is the whole point of moving it here. A recording is
  * something people send each other -- "watch the first ten minutes of this" -- and a dialog
- * has no address. This does: /revops/meetings/42 survives a refresh, a bookmark and a
+ * has no address. This does: /sales/meetings/42 survives a refresh, a bookmark and a
  * paste into Slack, because the page resolves itself from the id rather than from whatever
  * the list happened to be holding.
  *
@@ -62,7 +62,7 @@ export default function MeetingDetailPage() {
   const meetingId = Number(rawId);
   const validId = Number.isInteger(meetingId) && meetingId > 0;
 
-  const configured = isRevOpsBackendConfigured();
+  const configured = isSalesBackendConfigured();
   const playerRef = useRef<RecordingPlayerHandle>(null);
   // Held here rather than inside the transcript: the player owns the position, and the
   // transcript is one of possibly several things that want to know it.
@@ -102,14 +102,14 @@ export default function MeetingDetailPage() {
   const deal = parseOpportunityDetails(meeting?.opportunityDetails);
 
   return (
-    <RevOpsShell
+    <SalesShell
       title={meeting?.title ?? "Meeting"}
       configured={configured}
       configKey="ONE_WSO2_REVOPS_BACKEND_URL"
       forbidden={forbidden}
     >
       <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to="/revops" underline="hover" color="inherit">
+        <Link component={RouterLink} to="/sales" underline="hover" color="inherit">
           Meetings
         </Link>
         <Typography color="text.primary" variant="body2">
@@ -236,7 +236,7 @@ export default function MeetingDetailPage() {
           </Box>
         </Box>
       ) : null}
-    </RevOpsShell>
+    </SalesShell>
   );
 }
 

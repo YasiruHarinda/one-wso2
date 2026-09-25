@@ -52,9 +52,10 @@ declare global {
       // Groups mailing-list subscriptions). Optional — when absent the Email
       // Groups screen shows a not-connected state.
       ONE_WSO2_EMAIL_GROUPS_BACKEND_URL?: string;
-      // Base URL for the RevOps (auto-recorded meetings) backend — people-ops-
+      // Base URL for the Sales (auto-recorded meetings) backend — people-ops-
       // suite's meet-app service, reused unchanged. Optional — when absent the
-      // RevOps app shows a not-connected state and makes no requests.
+      // Sales app shows a not-connected state and makes no requests.
+      // The key keeps its original "REVOPS" name deliberately -- see salesBackendUrl.
       ONE_WSO2_REVOPS_BACKEND_URL?: string;
       // Base URL for the digiops-hr promotion-app backend. Optional — when
       // absent, ConnectedServices' "Last promotion" row falls back to a
