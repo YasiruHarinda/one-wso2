@@ -32,7 +32,7 @@ vi.mock("@components/side-rail/usePerspectiveVisibility", () => ({
 }));
 const revops: PerspectiveDef = {
   key: "revops",
-  label: "RevOps",
+  label: "Sales",
   icon: RadioIcon,
   access: true,
   path: "/revops",
@@ -48,7 +48,7 @@ import RevOpsShell from "./RevOpsShell";
 function renderShell(props: { configured: boolean; forbidden?: boolean }) {
   return render(
     <MemoryRouter>
-      <RevOpsShell title="RevOps" configKey="ONE_WSO2_REVOPS_BACKEND_URL" {...props}>
+      <RevOpsShell title="Sales" configKey="ONE_WSO2_REVOPS_BACKEND_URL" {...props}>
         <div>meeting list</div>
       </RevOpsShell>
     </MemoryRouter>,
@@ -56,9 +56,9 @@ function renderShell(props: { configured: boolean; forbidden?: boolean }) {
 }
 
 describe("RevOpsShell", () => {
-  it("says RevOps is not connected, and names the key to set, when no backend URL is configured", () => {
+  it("says Sales is not connected, and names the key to set, when no backend URL is configured", () => {
     renderShell({ configured: false });
-    expect(screen.getByText(/RevOps isn't connected yet/)).toBeInTheDocument();
+    expect(screen.getByText(/Sales isn't connected yet/)).toBeInTheDocument();
     expect(screen.getByText("ONE_WSO2_REVOPS_BACKEND_URL")).toBeInTheDocument();
     expect(screen.queryByText("meeting list")).not.toBeInTheDocument();
   });
@@ -68,15 +68,15 @@ describe("RevOpsShell", () => {
   it("shows the shared no-access card, with a way home, when the backend refuses the caller", () => {
     renderShell({ configured: true, forbidden: true });
     expect(screen.getByRole("heading", { name: "Nothing here for you yet" })).toBeInTheDocument();
-    expect(screen.getByText(/RevOps is here, but none of it is open to you/)).toBeInTheDocument();
+    expect(screen.getByText(/Sales is here, but none of it is open to you/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back to Home" })).toHaveAttribute("href", "/me");
     expect(screen.queryByText("meeting list")).not.toBeInTheDocument();
   });
 
-  it("never says Echo -- the product is RevOps on every state of the page", () => {
+  it("never says Echo or RevOps -- the product is Sales on every state of the page", () => {
     for (const props of [{ configured: false }, { configured: true, forbidden: true }]) {
       const { container, unmount } = renderShell(props);
-      expect(container.textContent).not.toMatch(/Echo/);
+      expect(container.textContent).not.toMatch(/Echo|RevOps/);
       unmount();
     }
   });
