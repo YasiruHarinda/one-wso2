@@ -20,7 +20,12 @@ import { Chip, Skeleton } from "@wso2/oxygen-ui";
 import RoutedTabs, { type RoutedTabDef } from "@components/routed-tabs/RoutedTabs";
 import { useMeProfile } from "@features/my/api/useMeProfile";
 import ParShell from "../components/ParShell";
-import { useActiveParCycle, useParHasActiveCycle, useParHasLead } from "../api/useParData";
+import {
+  useActiveParCycle,
+  useParEmployeeItemVisible,
+  useParHasActiveCycle,
+  useParHasLead,
+} from "../api/useParData";
 
 // Tab labels and order match par-app's own OngoingCycleView.tsx tab bar
 // (Employee Feedback / Request 360° / Provide 360° / F2F). History is
@@ -116,5 +121,24 @@ export function ParRequiresActiveCycleRoute({ children }: { children: ReactNode 
   const { isActive, isLoading } = useParHasActiveCycle(profile.data?.userInfo.workEmail, profile.isLoading);
   if (isLoading) return null;
   if (!isActive) return <Navigate to="/me/performance/history" replace />;
+  return <>{children}</>;
+}
+
+/** Guards the whole /me/performance subtree — someone with nothing to show
+ * (no active cycle, no real or legacy history) is redirected to /me instead
+ * of reaching a page the Me menu is already hiding. Same shape as
+ * ParRequiresAdminRoute (App.tsx's own /people-ops/performance/admin guard):
+ * the eligibility check wraps the page element from the outside, so hiding
+ * the menu row is not the only thing enforcing this — same reasoning as
+ * ParRequiresLeadRoute above. */
+export function ParRequiresSomethingToShowRoute({ children }: { children: ReactNode }) {
+  const profile = useMeProfile();
+  const { canSee, isLoading } = useParEmployeeItemVisible(
+    profile.data?.userInfo.workEmail,
+    profile.data?.employee?.employmentType,
+    profile.isLoading,
+  );
+  if (isLoading) return null;
+  if (!canSee) return <Navigate to="/me" replace />;
   return <>{children}</>;
 }

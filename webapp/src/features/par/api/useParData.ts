@@ -21,7 +21,7 @@ import { useAccessToken } from "@hooks/useAccessToken";
 import { parBackendUrl, parServiceUrls } from "@config/apiConfig";
 import { digiopsHeaders } from "@features/my/util/digiopsHeaders";
 import type { ParCycle, ParEmployeeInfo, ParRating } from "./types";
-import { useParLeadEmployees } from "./useLeadHistory";
+import { useParLeadEmployees, useParLegacyHistory } from "./useLeadHistory";
 
 // GET par-app's own /employees/{workEmail} — carries `leadEmail`, the exact
 // field OngoingCycleView.tsx gates its tab set on. Not people-app's
@@ -143,6 +143,77 @@ export function useParHasActiveCycle(
   return {
     isActive: !(cycles.isSuccess && cycles.data.length === 0),
     isLoading: workEmailLoading || cycles.isLoading,
+  };
+}
+
+/**
+ * Whether the "PAR" item under Me should be shown at all.
+ *
+ * Legacy par-app never hides its own menu entry for anyone (it always shows
+ * "Employee Portal"/"PAR History" and falls back to an empty state) — but an
+ * intern with no active cycle and no record of any kind, real or legacy,
+ * lands on a History tab with nothing legitimate behind it, which reads as
+ * broken rather than as "nothing here for you yet". This intentionally
+ * diverges from legacy for exactly that case.
+ *
+ * Scoped to interns specifically, not to emptiness alone: par-app's own
+ * `employeeTypes` config keeps INTERNSHIP eligible for cycles (config.toml),
+ * so an intern currently in one keeps seeing PAR exactly like everyone else
+ * — only the genuinely-nothing-yet case hides the item.
+ *
+ * "Real (post-migration) history" is `useClosedParCycles`, not a
+ * per-cycle rating scan: `GET /par-cycles?email=&status=CLOSED` is already
+ * filtered server-side to cycles where THIS employee has a `hris_par_rating`
+ * row (db_queries.bal's `... IN (SELECT par_cycle_id FROM hris_par_rating
+ * WHERE par_employee_email = ...)`), the exact query legacy's own "My
+ * History" tab (ParHistory.tsx) uses for its upfront "No data available".
+ * One cheap, pre-filtered call — not the N+1 a naive "check every closed
+ * cycle" scan would need.
+ *
+ * Fails OPEN (visible), same reasoning as useParHasLead: a UX-only
+ * visibility decision must never hide the item from someone who does have
+ * something to see just because a fetch hasn't landed yet. Both history
+ * checks only fire once we already know it's an intern with no active cycle
+ * — no extra request for anyone else.
+ *
+ * `employmentType` is compared case-insensitively against "internship". The
+ * actual wire value is `"INTERNSHIP"` (uppercase): people-app's own
+ * `/employees/{id}` and par-app both source this field from the SAME
+ * `employment_type` master-data table via digiops-hr's shared `entity`
+ * GraphQL service, whose own README documents the field's value set as
+ * uppercase strings (`"PERMANENT" | "CONSULTANCY" | "INTERNSHIP" | ...`) —
+ * matching par-app's own `employeeTypes` config.toml list. (An earlier
+ * version of this comment cited title-case "Internship" from unrelated
+ * services — ats/backend, career-vacancy-service, candidate-service — which
+ * each define their own independent enum for candidate/offer workflows, not
+ * the employment_type table this field actually reads from.) Comparing
+ * case-insensitively means the exact casing doesn't matter either way.
+ */
+export function useParEmployeeItemVisible(
+  workEmail: string | undefined,
+  employmentType: string | undefined,
+  workEmailLoading: boolean,
+  enabled = true,
+): { canSee: boolean; isLoading: boolean } {
+  const isIntern = employmentType?.toLowerCase() === "internship";
+  const { isActive, isLoading: isActiveLoading } = useParHasActiveCycle(
+    enabled ? workEmail : undefined,
+    workEmailLoading,
+  );
+  const checkHistory = enabled && isIntern && !isActiveLoading && !isActive;
+  const legacyHistory = useParLegacyHistory(workEmail, checkHistory);
+  const closedCycles = useClosedParCycles(workEmail, checkHistory);
+  const hasNothingToShow =
+    isIntern &&
+    !isActive &&
+    legacyHistory.isSuccess &&
+    legacyHistory.data.length === 0 &&
+    closedCycles.isSuccess &&
+    closedCycles.data.length === 0;
+  return {
+    canSee: !hasNothingToShow,
+    isLoading:
+      enabled && (isActiveLoading || (checkHistory && (legacyHistory.isLoading || closedCycles.isLoading))),
   };
 }
 
