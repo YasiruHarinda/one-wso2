@@ -521,7 +521,7 @@ export const PERSPECTIVES: readonly PerspectiveDef[] = [
   // just doesn't decide visibility.
   {
     key: "revops",
-    label: "RevOps",
+    label: "Sales",
     icon: RadioIcon,
     access: true,
     externallyGated: true,
