@@ -35,7 +35,7 @@ const revops: PerspectiveDef = {
   label: "Sales",
   icon: RadioIcon,
   access: true,
-  path: "/revops",
+  path: "/sales",
 };
 vi.mock("@context/perspective/PerspectiveContext", () => ({
   useActivePerspective: () => revops,
