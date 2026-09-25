@@ -32,17 +32,39 @@ const openCycles: { isSuccess: boolean; data?: unknown[] } = {
   isSuccess: false,
 };
 
+// useParEmployeeItemVisible's own legacy-history check, keyed
+// "par-legacy-history" — only ever read for an intern with no open cycle.
+const legacyHistory: { isSuccess: boolean; isLoading: boolean; data?: unknown[] } = {
+  isSuccess: false,
+  isLoading: false,
+};
+
+// useParEmployeeItemVisible's own real-history check, keyed
+// "par-cycles-closed" — GET /par-cycles?status=CLOSED, pre-filtered
+// server-side to cycles where this employee already has a rating (same
+// query legacy's own "My History" tab uses for its upfront empty state).
+// Only read for an intern with no open cycle, alongside legacyHistory above.
+const closedCycles: { isSuccess: boolean; isLoading: boolean; data?: unknown[] } = {
+  isSuccess: false,
+  isLoading: false,
+};
+
 vi.mock("@tanstack/react-query", () => ({
   useQuery: ({ queryKey }: { queryKey: unknown[] }) => {
     if (queryKey[0] === "par-employee-info") return employeeInfo;
     if (queryKey[0] === "par-cycles-open") return openCycles;
+    if (queryKey[0] === "par-legacy-history") return legacyHistory;
+    if (queryKey[0] === "par-cycles-closed") return closedCycles;
     return { data: undefined };
   },
 }));
 vi.mock("@asgardeo/react", () => ({ useAsgardeo: () => ({ isSignedIn: true }) }));
 vi.mock("@hooks/useAccessToken", () => ({ useAccessToken: () => async () => "token" }));
 
-const profile = { data: { userInfo: { workEmail: "someone@wso2.com" } }, isLoading: false };
+const profile = {
+  data: { userInfo: { workEmail: "someone@wso2.com" }, employee: { employmentType: "Permanent" } },
+  isLoading: false,
+};
 vi.mock("@features/my/api/useMeProfile", () => ({ useMeProfile: () => profile }));
 
 vi.mock("../components/ParShell", () => ({
@@ -68,7 +90,14 @@ beforeEach(() => {
   employeeInfo.data = undefined;
   openCycles.isSuccess = false;
   openCycles.data = undefined;
+  legacyHistory.isSuccess = false;
+  legacyHistory.isLoading = false;
+  legacyHistory.data = undefined;
+  closedCycles.isSuccess = false;
+  closedCycles.isLoading = false;
+  closedCycles.data = undefined;
   profile.isLoading = false;
+  profile.data.employee.employmentType = "Permanent";
 });
 
 function hasLead(leadEmail: string | null) {
@@ -79,6 +108,28 @@ function hasLead(leadEmail: string | null) {
 function hasNoActiveCycle() {
   openCycles.isSuccess = true;
   openCycles.data = [];
+}
+
+function isIntern() {
+  profile.data.employee.employmentType = "Internship";
+}
+
+function hasLegacyHistory(records: unknown[] = [{ cycleName: "2022-Q1" }]) {
+  legacyHistory.isSuccess = true;
+  legacyHistory.data = records;
+}
+
+function hasClosedCycleHistory(records: unknown[] = [{ parCycleId: 7 }]) {
+  closedCycles.isSuccess = true;
+  closedCycles.data = records;
+}
+
+/** Both real and legacy history come back empty — genuinely nothing. */
+function hasNoHistoryAtAll() {
+  legacyHistory.isSuccess = true;
+  legacyHistory.data = [];
+  closedCycles.isSuccess = true;
+  closedCycles.data = [];
 }
 
 /** The group, wired the way App.tsx wires it. */
@@ -215,6 +266,62 @@ describe("an employee with an active lead but no open PAR cycle", () => {
     show("/me/performance/f2f");
     expect(await screen.findByTestId("url")).toHaveTextContent("/me/performance/history");
   });
+});
+
+describe("an intern with nothing to show", () => {
+  beforeEach(() => {
+    isIntern();
+    hasLead(null);
+    hasNoActiveCycle();
+  });
+
+  it("is redirected to /me when there's no active cycle and no history at all — real or legacy", async () => {
+    hasNoHistoryAtAll();
+    show();
+    expect(await screen.findByTestId("url")).toHaveTextContent("/me");
+    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+  });
+
+  it("still reaches the group directly by URL — the redirect is not fooled by a deep link", async () => {
+    hasNoHistoryAtAll();
+    show("/me/performance/history");
+    expect(await screen.findByTestId("url")).toHaveTextContent("/me");
+  });
+
+  it("is not redirected when they have legacy history but no real history", async () => {
+    hasLegacyHistory();
+    closedCycles.isSuccess = true;
+    closedCycles.data = [];
+    show();
+    expect(await screen.findByRole("tab", { name: "PAR History" })).toBeInTheDocument();
+  });
+
+  // The gap a naive "no active cycle + no legacy" check would miss: a past
+  // CLOSED cycle they actually have a rating in — legacy's own "My History"
+  // signal (GET /par-cycles?status=CLOSED, pre-filtered server-side to
+  // cycles with a rating row for this employee), not something discovered
+  // only after picking a cycle in the dropdown.
+  it("is not redirected when they have real closed-cycle history but no legacy history", async () => {
+    legacyHistory.isSuccess = true;
+    legacyHistory.data = [];
+    hasClosedCycleHistory();
+    show();
+    expect(await screen.findByRole("tab", { name: "PAR History" })).toBeInTheDocument();
+  });
+
+  it("is not redirected while either history lookup is still in flight", async () => {
+    legacyHistory.isLoading = true;
+    show();
+    expect(await screen.findByTestId("url")).toHaveTextContent("/me/performance");
+    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+  });
+});
+
+it("an intern currently in an active cycle is not redirected", async () => {
+  isIntern();
+  hasLead("lead@wso2.com");
+  show();
+  expect(await screen.findByRole("tab", { name: "Employee Feedback" })).toBeInTheDocument();
 });
 
 // Deliberate: a slow or failed lookup must not hide tabs from someone who does

@@ -26,19 +26,21 @@ import {
 import { capabilitiesFromPrivileges, type Capability } from "@constants/appMenu";
 import { FINANCE_ITEM_IDS } from "@constants/financeApps";
 import { LEAVE_ITEM_IDS } from "@constants/meApps";
+import { PAR_EMPLOYEE_ITEM_ID } from "@constants/parApps";
 import { DUE_DILIGENCE_ITEM_IDS } from "@constants/dueDiligenceApps";
 import { SECURITY_ITEM_IDS } from "@constants/securityApps";
 import { INFRA_ITEM_IDS } from "@constants/infraApps";
 import { useInfraGate } from "@features/infra/api/useInfraGate";
 import { useActivePerspective } from "@context/perspective/PerspectiveContext";
 import { useUserInfo } from "@api/useUserInfo";
+import { useMeProfile } from "@features/my/api/useMeProfile";
 import { useFinanceGate } from "@features/finance/api/useFinanceGate";
 import { useLeaveGate } from "@features/leave/api/useLeaveGate";
 import { useMarketingOpsGate } from "@features/marketing-ops/api/useMarketingOpsGate";
 import { useDueDiligenceGate } from "@features/due-diligence/api/useDueDiligenceGate";
 import { useSecurityGate } from "@features/security/api/useSecurityGate";
 import { useSubscriptionGate } from "@features/subscriptions/api/useSubscriptionGate";
-import { useParCanSeeLeadPortal } from "@features/par/api/useParData";
+import { useParCanSeeLeadPortal, useParEmployeeItemVisible } from "@features/par/api/useParData";
 import { useParIsAdmin } from "@features/par/api/useParIsAdmin";
 import { useUmtGate } from "@features/umt/api/useUmtGate";
 import { isSriLankaWorkLocation } from "@utils/locationGate";
@@ -166,6 +168,21 @@ export function usePerspectiveVisibility(): PerspectiveVisibility {
   // every gate above there's no per-perspective fetch to avoid by disabling it.
   const parAdminPortalGate = useParIsAdmin();
 
+  // The employee-facing "PAR" item under Me — see useParEmployeeItemVisible
+  // for why this hides for interns with nothing to show rather than always
+  // showing an empty History tab. `useMeProfile` (not `useUserInfo`) because
+  // `employmentType` only lives on the fuller /employees/{id} record; sharing
+  // its query key with every other `useMeProfile()` caller means this is a
+  // fresh request only the first time something asks, on Me. Only fetched
+  // while Me is active — every other perspective has no business asking.
+  const meProfile = useMeProfile(undefined, active.key === "me");
+  const parEmployeeItemGate = useParEmployeeItemVisible(
+    meProfile.data?.userInfo.workEmail,
+    meProfile.data?.employee?.employmentType,
+    meProfile.isLoading,
+    active.key === "me",
+  );
+
   // UMT is the same shape of problem again: Product Management is
   // UMT_ADMIN-only, decided by UMT's own /update/user-info roles, which bear
   // no relation to the people-app privilege numbers `caps` is built from.
@@ -214,6 +231,7 @@ export function usePerspectiveVisibility(): PerspectiveVisibility {
     if (SUBSCRIPTION_ITEM_IDS.has(s.id)) return subscriptionCanSee(s.id);
     if (s.id === PAR_LEAD_PORTAL_ITEM_ID) return parLeadPortalGate.canSee;
     if (s.id === PAR_ADMIN_PORTAL_ITEM_ID) return parAdminPortalGate.isAdmin;
+    if (s.id === PAR_EMPLOYEE_ITEM_ID) return parEmployeeItemGate.canSee;
     if (UMT_ADMIN_ITEM_IDS.has(s.id)) return umtGate.isAdmin && !umtGate.isResolving;
     if (isMarketingOps) return marketingOpsGate.canSee(s.id);
     if (INFRA_ITEM_IDS.has(s.id)) return infraGate.canSee(s.id);

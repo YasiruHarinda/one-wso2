@@ -20,7 +20,12 @@ import { Chip, Skeleton } from "@wso2/oxygen-ui";
 import RoutedTabs, { type RoutedTabDef } from "@components/routed-tabs/RoutedTabs";
 import { useMeProfile } from "@features/my/api/useMeProfile";
 import ParShell from "../components/ParShell";
-import { useActiveParCycle, useParHasActiveCycle, useParHasLead } from "../api/useParData";
+import {
+  useActiveParCycle,
+  useParEmployeeItemVisible,
+  useParHasActiveCycle,
+  useParHasLead,
+} from "../api/useParData";
 
 // Tab labels and order match par-app's own OngoingCycleView.tsx tab bar
 // (Employee Feedback / Request 360° / Provide 360° / F2F). History is
@@ -52,13 +57,25 @@ const HISTORY_ONLY_TABS: RoutedTabDef[] = [{ segment: "history", label: "PAR His
 export default function ParGroupPage() {
   const profile = useMeProfile();
   const workEmail = profile.data?.userInfo.workEmail;
+  const employmentType = profile.data?.employee?.employmentType;
   const activeCycles = useActiveParCycle(workEmail);
   // Unset while there's no active cycle to name.
   const cycleName = activeCycles.data?.[0]?.parCycleName;
   const { hasLead, isLoading } = useParHasLead(workEmail, profile.isLoading);
   const { isActive, isLoading: isActiveLoading } = useParHasActiveCycle(workEmail, profile.isLoading);
+  // Same gate that hides this page's own entry in the Me menu — see
+  // useParEmployeeItemVisible. Kept here too so typing the URL directly
+  // doesn't reach a page the menu is hiding; matches ParAdminGroupPage's own
+  // redirect-away-if-not-eligible treatment.
+  const { canSee, isLoading: isVisibilityLoading } = useParEmployeeItemVisible(
+    workEmail,
+    employmentType,
+    profile.isLoading,
+  );
 
   const tabs = !isActive ? HISTORY_ONLY_TABS : hasLead ? FULL_TABS : LEADLESS_TABS;
+
+  if (!isVisibilityLoading && !canSee) return <Navigate to="/me" replace />;
 
   return (
     <ParShell
@@ -68,7 +85,7 @@ export default function ParGroupPage() {
       {/* The active cycle's own name/period, not the page's title — this
           page is "Performance Appraisal Review" regardless of which cycle is running. */}
       {cycleName && <Chip label={cycleName} size="small" color="primary" variant="outlined" sx={{ mb: 2, fontWeight: 600 }} />}
-      {isLoading || isActiveLoading ? (
+      {isLoading || isActiveLoading || isVisibilityLoading ? (
         <Skeleton variant="rectangular" height={36} sx={{ borderRadius: 1, mb: 2, maxWidth: 640 }} />
       ) : (
         <>
