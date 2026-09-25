@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { currentPerspectiveKey, reachablePerspectives } from "@constants/perspectives";
+import { reachablePerspectives } from "@constants/perspectives";
 
 /**
  * Favourite apps, for the launcher.
@@ -82,14 +82,10 @@ export function readFavourites(sub: string | undefined): string[] {
     if (!Array.isArray(parsed)) return DEFAULT_FAVOURITES.filter((k) => isFavouritable(k));
     const allowed = favouritableKeys();
     const seen = new Set<string>();
-    // Saved keys are mapped through currentPerspectiveKey first, so a favourite saved under a
-    // perspective's old key (e.g. "revops", now "sales") survives the rename.
-    return parsed
-      .map((k) => (typeof k === "string" ? currentPerspectiveKey(k) : k))
-      .filter(
-        (k): k is string =>
-          typeof k === "string" && allowed.has(k) && !seen.has(k) && (seen.add(k), true),
-      );
+    return parsed.filter(
+      (k): k is string =>
+        typeof k === "string" && allowed.has(k) && !seen.has(k) && (seen.add(k), true),
+    );
   } catch {
     return DEFAULT_FAVOURITES.filter((k) => isFavouritable(k));
   }

@@ -103,10 +103,4 @@ describe("favourites", () => {
     expect(readFavourites(USER)).toHaveLength(keys.length);
     expect(localStorage.getItem("one-wso2.pinned.v1.user-a")).toBeNull();
   });
-  // Sales was called RevOps, with the key "revops". A favourite saved before the rename must
-  // come back as "sales", not vanish because the old key is no longer a perspective.
-  it("keeps a favourite saved under a renamed perspective's old key", () => {
-    localStorage.setItem(key(USER), JSON.stringify(["me", "revops"]));
-    expect(readFavourites(USER)).toEqual(["me", "sales"]);
-  });
 });

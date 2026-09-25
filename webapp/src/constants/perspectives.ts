@@ -668,19 +668,3 @@ export function findPerspectiveByPath(pathname: string): PerspectiveDef | undefi
 export function findPerspectiveByKey(key: string): PerspectiveDef | undefined {
   return PERSPECTIVES.find((p) => p.key === key);
 }
-
-/**
- * Perspective keys that have been renamed, old → new.
- *
- * Favourites and the landing choice are saved in the browser BY KEY, so a renamed key would
- * otherwise read back as unknown and be silently dropped — the user's favourite tile or chosen
- * landing page would just disappear. Reading a saved key through currentPerspectiveKey maps it
- * to its new name instead. A Map rather than an object so a saved value like "toString" cannot
- * match an inherited property.
- */
-const RENAMED_PERSPECTIVE_KEYS: ReadonlyMap<string, string> = new Map([["revops", "sales"]]);
-
-/** The current key for a possibly-renamed saved key; unrenamed keys pass through unchanged. */
-export function currentPerspectiveKey(key: string): string {
-  return RENAMED_PERSPECTIVE_KEYS.get(key) ?? key;
-}

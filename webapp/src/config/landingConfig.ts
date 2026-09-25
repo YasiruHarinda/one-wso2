@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import { currentPerspectiveKey, reachablePerspectives, type PerspectiveDef } from "@constants/perspectives";
+import { reachablePerspectives, type PerspectiveDef } from "@constants/perspectives";
 
 /**
  * Where the app opens, when the URL names no particular page.
@@ -85,10 +85,7 @@ const STORAGE_KEY = "one-wso2.landing";
  */
 export function landingPreference(): string | undefined {
   try {
-    // Through currentPerspectiveKey, so a choice saved under a renamed perspective's old key
-    // (e.g. "revops", now "sales") is kept rather than silently reset.
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const saved = raw === null ? null : currentPerspectiveKey(raw);
+    const saved = localStorage.getItem(STORAGE_KEY);
     return isLandingKey(saved) ? saved : undefined;
   } catch {
     return undefined;
