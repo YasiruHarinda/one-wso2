@@ -175,6 +175,19 @@ export function useParHasActiveCycle(
  * something to see just because a fetch hasn't landed yet. Both history
  * checks only fire once we already know it's an intern with no active cycle
  * — no extra request for anyone else.
+ *
+ * `employmentType` is compared case-insensitively against "internship". The
+ * actual wire value is `"INTERNSHIP"` (uppercase): people-app's own
+ * `/employees/{id}` and par-app both source this field from the SAME
+ * `employment_type` master-data table via digiops-hr's shared `entity`
+ * GraphQL service, whose own README documents the field's value set as
+ * uppercase strings (`"PERMANENT" | "CONSULTANCY" | "INTERNSHIP" | ...`) —
+ * matching par-app's own `employeeTypes` config.toml list. (An earlier
+ * version of this comment cited title-case "Internship" from unrelated
+ * services — ats/backend, career-vacancy-service, candidate-service — which
+ * each define their own independent enum for candidate/offer workflows, not
+ * the employment_type table this field actually reads from.) Comparing
+ * case-insensitively means the exact casing doesn't matter either way.
  */
 export function useParEmployeeItemVisible(
   workEmail: string | undefined,
@@ -182,7 +195,7 @@ export function useParEmployeeItemVisible(
   workEmailLoading: boolean,
   enabled = true,
 ): { canSee: boolean; isLoading: boolean } {
-  const isIntern = employmentType === "Internship";
+  const isIntern = employmentType?.toLowerCase() === "internship";
   const { isActive, isLoading: isActiveLoading } = useParHasActiveCycle(
     enabled ? workEmail : undefined,
     workEmailLoading,

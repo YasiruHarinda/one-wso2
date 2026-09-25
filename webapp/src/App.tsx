@@ -37,6 +37,7 @@ import ParGroupPage, {
   ParGroupIndex,
   ParRequiresActiveCycleRoute,
   ParRequiresLeadRoute,
+  ParRequiresSomethingToShowRoute,
 } from "@features/par/pages/ParGroupPage";
 import ParLeadGroupPage, { ParLeadGroupIndex, ParRequiresTeamLeadRoute } from "@features/par/pages/ParLeadGroupPage";
 import ParAdminGroupPage, { ParAdminGroupIndex, ParRequiresAdminRoute } from "@features/par/pages/ParAdminGroupPage";
@@ -367,8 +368,16 @@ export default function App() {
               docs/ported-apps/par-app.md. Not gated beyond signing in —
               every employee has their own PAR — except an intern with
               nothing to show (no active cycle, no history of any kind),
-              who is redirected to /me; see useParEmployeeItemVisible. */}
-          <Route path="me/performance" element={<ParGroupPage />}>
+              who ParRequiresSomethingToShowRoute redirects to /me; same
+              shape as ParRequiresAdminRoute below. */}
+          <Route
+            path="me/performance"
+            element={
+              <ParRequiresSomethingToShowRoute>
+                <ParGroupPage />
+              </ParRequiresSomethingToShowRoute>
+            }
+          >
             <Route index element={<ParGroupIndex />} />
             {/* Employee Feedback and Request 360° are hidden from a leadless
                 employee entirely in the source (OngoingCycleView.tsx), not

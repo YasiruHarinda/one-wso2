@@ -57,25 +57,13 @@ const HISTORY_ONLY_TABS: RoutedTabDef[] = [{ segment: "history", label: "PAR His
 export default function ParGroupPage() {
   const profile = useMeProfile();
   const workEmail = profile.data?.userInfo.workEmail;
-  const employmentType = profile.data?.employee?.employmentType;
   const activeCycles = useActiveParCycle(workEmail);
   // Unset while there's no active cycle to name.
   const cycleName = activeCycles.data?.[0]?.parCycleName;
   const { hasLead, isLoading } = useParHasLead(workEmail, profile.isLoading);
   const { isActive, isLoading: isActiveLoading } = useParHasActiveCycle(workEmail, profile.isLoading);
-  // Same gate that hides this page's own entry in the Me menu — see
-  // useParEmployeeItemVisible. Kept here too so typing the URL directly
-  // doesn't reach a page the menu is hiding; matches ParAdminGroupPage's own
-  // redirect-away-if-not-eligible treatment.
-  const { canSee, isLoading: isVisibilityLoading } = useParEmployeeItemVisible(
-    workEmail,
-    employmentType,
-    profile.isLoading,
-  );
 
   const tabs = !isActive ? HISTORY_ONLY_TABS : hasLead ? FULL_TABS : LEADLESS_TABS;
-
-  if (!isVisibilityLoading && !canSee) return <Navigate to="/me" replace />;
 
   return (
     <ParShell
@@ -85,7 +73,7 @@ export default function ParGroupPage() {
       {/* The active cycle's own name/period, not the page's title — this
           page is "Performance Appraisal Review" regardless of which cycle is running. */}
       {cycleName && <Chip label={cycleName} size="small" color="primary" variant="outlined" sx={{ mb: 2, fontWeight: 600 }} />}
-      {isLoading || isActiveLoading || isVisibilityLoading ? (
+      {isLoading || isActiveLoading ? (
         <Skeleton variant="rectangular" height={36} sx={{ borderRadius: 1, mb: 2, maxWidth: 640 }} />
       ) : (
         <>
@@ -133,5 +121,24 @@ export function ParRequiresActiveCycleRoute({ children }: { children: ReactNode 
   const { isActive, isLoading } = useParHasActiveCycle(profile.data?.userInfo.workEmail, profile.isLoading);
   if (isLoading) return null;
   if (!isActive) return <Navigate to="/me/performance/history" replace />;
+  return <>{children}</>;
+}
+
+/** Guards the whole /me/performance subtree — someone with nothing to show
+ * (no active cycle, no real or legacy history) is redirected to /me instead
+ * of reaching a page the Me menu is already hiding. Same shape as
+ * ParRequiresAdminRoute (App.tsx's own /people-ops/performance/admin guard):
+ * the eligibility check wraps the page element from the outside, so hiding
+ * the menu row is not the only thing enforcing this — same reasoning as
+ * ParRequiresLeadRoute above. */
+export function ParRequiresSomethingToShowRoute({ children }: { children: ReactNode }) {
+  const profile = useMeProfile();
+  const { canSee, isLoading } = useParEmployeeItemVisible(
+    profile.data?.userInfo.workEmail,
+    profile.data?.employee?.employmentType,
+    profile.isLoading,
+  );
+  if (isLoading) return null;
+  if (!canSee) return <Navigate to="/me" replace />;
   return <>{children}</>;
 }

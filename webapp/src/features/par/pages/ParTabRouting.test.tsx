@@ -71,9 +71,13 @@ vi.mock("../components/ParShell", () => ({
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
 
-const { default: ParGroupPage, ParGroupIndex, ParRequiresLeadRoute, ParRequiresActiveCycleRoute } = await import(
-  "./ParGroupPage"
-);
+const {
+  default: ParGroupPage,
+  ParGroupIndex,
+  ParRequiresLeadRoute,
+  ParRequiresActiveCycleRoute,
+  ParRequiresSomethingToShowRoute,
+} = await import("./ParGroupPage");
 
 /** Always mounted, so a redirect is visible even when the route renders nothing. */
 function UrlProbe() {
@@ -143,7 +147,14 @@ function show(initial = "/me/performance") {
     <MemoryRouter initialEntries={[initial]}>
       <UrlProbe />
       <Routes>
-        <Route path="/me/performance" element={<ParGroupPage />}>
+        <Route
+          path="/me/performance"
+          element={
+            <ParRequiresSomethingToShowRoute>
+              <ParGroupPage />
+            </ParRequiresSomethingToShowRoute>
+          }
+        >
           <Route index element={<ParGroupIndex />} />
           <Route
             path="employee-feedback"
