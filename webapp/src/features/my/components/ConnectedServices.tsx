@@ -103,7 +103,7 @@ export default function ConnectedServices() {
             ) : null}
           </Stack>
           <PerformanceStages workEmail={ownerEmail} />
-          {parGate.canSee && (
+          {!parGate.isLoading && parGate.canSee && (
             <Box sx={{ mt: 1.25 }}>
               <Button variant="outlined" size="small" component={RouterLink} to="/me/performance" fullWidth>
                 Open employee feedback
