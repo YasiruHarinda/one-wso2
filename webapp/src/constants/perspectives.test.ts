@@ -69,8 +69,8 @@ describe("the RevOps perspective", () => {
     expect(keys(PERSPECTIVES)).toContain("revops");
     expect(keys(FUNCTIONAL_PERSPECTIVES)).toContain("revops");
     expect(keys(reachablePerspectives())).toContain("revops");
-    expect(findPerspectiveByKey("revops")?.path).toBe("/revops");
-    expect(findPerspectiveByPath("/revops")?.key).toBe("revops");
+    expect(findPerspectiveByKey("revops")?.path).toBe("/sales");
+    expect(findPerspectiveByPath("/sales")?.key).toBe("revops");
   });
 
   it("brings its rail, not just the tile", async () => {

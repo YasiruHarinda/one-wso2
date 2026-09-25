@@ -369,7 +369,7 @@ const REVOPS_SECTIONS: PerspectiveSection[] = [
     // scannable. Video reads as "recorded call" and its solid rectangle is the
     // strongest silhouette contrast against Radio's arcs at 20px.
     icon: VideoIcon,
-    path: "/revops",
+    path: "/sales",
   },
 ];
 
@@ -418,7 +418,7 @@ export interface PerspectiveDef {
    *
    * ALSO covers the near case where the landing does not forward because it
    * already IS the first row's destination -- RevOps, whose Meetings row points
-   * at `/revops` itself. The reason differs (nothing bounces) but the rail
+   * at `/sales` itself. The reason differs (nothing bounces) but the rail
    * problem is identical: two rows, one destination, and the reader has to work
    * out that they are the same place. The name is kept rather than split into a
    * second near-identical flag.
@@ -526,7 +526,7 @@ export const PERSPECTIVES: readonly PerspectiveDef[] = [
     access: true,
     externallyGated: true,
     forwardsToFirstItem: true,
-    path: "/revops",
+    path: "/sales",
     sections: REVOPS_SECTIONS,
   },
   // Held behind a preview flag, whole perspective and all, until it's ready
