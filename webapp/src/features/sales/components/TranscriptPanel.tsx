@@ -115,6 +115,9 @@ export default function TranscriptPanel({
               </InputAdornment>
             ),
           },
+          // A placeholder is not an accessible name -- screen readers may skip it, and it
+          // disappears once typing starts -- so the field is named explicitly.
+          htmlInput: { "aria-label": "Search in transcript" },
         }}
       />
 
